@@ -37,7 +37,7 @@
 		  			    	<img :src="item.messageBody"/>
 		  			    </div>
 		  			    <div class="usermessage" v-if="item.fileType==2">
-		  			    	<a :href="item.messageBody" target="_blank">点击下载文件</a>
+		  			    	<a :href="item.messageBody" target="_blank">{{item.filenames}}(点击下载)</a>
 		  			    </div>
 		  			    
 		  		   </div>
@@ -52,7 +52,6 @@
 										<div class="isjiahao"> <img src="./upload.png" /> </div>
 									</div>
 								</div> 
-		  				
 		  			</div>
 		  			<div style="height: 70%;">
 		  				<textarea class="sendmessage" id="textareaenter" v-model="sendmessage"></textarea>
@@ -92,12 +91,7 @@
 		  	    	<input type="text" v-model="searchuser" @keyup="testpassword($event)"  maxlength="13"  placeholder="用户搜索" />
 		  	    	<img src="./search.png" v-show="!entersearch"/>
 		  	    	<span class="clearsearch" v-show="entersearch" @click="cannelsearch">x</span>
-		  	    	
-		  	    </div>
-		  	  
-		  	  
-		  	  
-		  	  
+		  	   </div>
 		  	  <div>
 		  	  	
 		  	  </div>
@@ -138,6 +132,7 @@
       		userid:"",
       		serverip:"",
       		filepath:"",
+      		filenames:"",
       		picpath:"",
       		isprogressbar:false,
       		speed:0,
@@ -174,7 +169,6 @@
                          var arr=[];
                          this.searchuserlist=this.userlist.slice();
                          this.userlist.forEach((value,i)=>{
-                         	
                          	if(this.userlist[i].username.indexOf(this.searchuser)>=0){
                          		arr.push(this.userlist[i]);
                          		
@@ -184,7 +178,6 @@
 						  console.log(arr);
 				   	  }
 				  }
-
       	},
       	friendtalk(i,item){    //好友列表聊天
       		
@@ -209,9 +202,7 @@
  		  	 	 	value.isnewmessage=false;
  		  	 	 	value.messagenumber=0;
  		  	 	 }
- 		  	 	
- 		  	 })
-      		
+ 		  	})
       	},
       	talkinbroad(){   //广播聊天
       		this.inlineindex=999;
@@ -236,15 +227,16 @@
       		axios.post("chat/signOut").then(res=>{
       			
       			if(res.data.code===0){
-      				this.successsignout=true;
-      				if(this.timer){
-		  	  		   clearTimeout(this.timer)
-		  	  		}
-      				this.timer=setTimeout(()=>{
-      					    this.websock.close();
-      					    this.successsignout=false;
-         	                this.$router.replace('/');
-		  	  		},1500);
+      				this.$router.replace('/');
+//    				this.successsignout=true;
+//    				if(this.timer){
+//		  	  		   clearTimeout(this.timer)
+//		  	  		}
+//    				this.timer=setTimeout(()=>{
+//    					    this.websock.close();
+//    					    this.successsignout=false;
+//       	                this.$router.replace('/');
+//		  	  		},1500);
       				
       			}
       		})
@@ -310,7 +302,7 @@
 		                  obj.scrollTop= obj.scrollHeight;   
 		  	 },500);
 
-        	 	console.log(this.broadcast)
+        	 	console.log("广播"+this.broadcast)
         
         	 	
         	 }else if(message.messageType==2){    //接收新上线的人
@@ -441,7 +433,7 @@
         	 		
         	 	}
         	 }else if(message.messageType==3){  //接收下线的人
-        	 	console.log("下线的人"+message)
+        	 	 console.log("下线的人"+message)
         	      var id= message.offlineUserId;
         	      if(this.receiverId==id){
         	    
@@ -455,7 +447,9 @@
         	      	  }
         	      });   
                if(message.offlineUserName==this.username){
-                	return;
+      					this.websock.close();
+         	            this.$router.replace('/');
+                	    return;
                 }
                 this.promptlistarr.push({
                 	"username":message.offlineUserName+"下线啦",
@@ -487,7 +481,8 @@
 	              	  "fileType":2,
 	              	  "senderId":this.userid,
 	              	  "senderName":this.username,
-	              	  "messageBody":this.filepath
+	              	  "messageBody":this.filepath,
+	              	  "filenames":this.filenames
 	                  }
        		   	  }else if(this.picpath!=""){
        		   	  	 var data={
@@ -524,7 +519,8 @@
 		              "receiverId":this.receiverId,
 		              "receiverName":this.receiverName,
 		              "senderName":this.username,
-	              	  "messageBody":this.filepath
+	              	  "messageBody":this.filepath,
+	              	  "filenames":this.filenames
 	                  }
        		   	  }else if(this.picpath!=""){
        		   	  	 var data={
@@ -545,6 +541,7 @@
         	  this.websock.send(data);
         	  this.sendmessage="";
         	  this.filepath="";
+        	  this.filenames="";
         	  this.picpath="";
         },
         callback1(progressEvent){
@@ -574,8 +571,6 @@
       		}else{
       			var inputDOM = this.$refs.picersss;
       		}
-      		
-
 			let hhh=inputDOM.files[0];
 			
 			let imagSize = hhh.size; //图片尺寸大小单位为（b字节）
@@ -605,6 +600,7 @@
 		           if(res.data.code==2){
 		         
 		           	  _this.filepath=res.data.data.path;
+		           	  _this.filenames=res.data.message;
 		           	  _this.websocketsend();
 		           }
 		           if(res.data.code==1){
@@ -614,7 +610,6 @@
 		           	   	 _this.picpath=res.data.data.path;
 		           	     _this.websocketsend();
 		           	   }
-		           	  
 		           }
 		        }).then(error =>{
 		            console.log(error)
@@ -829,11 +824,9 @@
  		vertical-align: middle;
  		cursor: pointer;
  	}
- 	
  	.bbn input {
  		outline: none;
  	}
- 	
  	.videos {
  		width: 20px !important;
  		padding-left: 0px;

@@ -2,7 +2,7 @@
 	<div v-show="ismannger">
 		
         <div class="mannertitle">
-        	<div class="titleinner">
+           <div class="titleinner">
         	 <div>欢迎进入后台管理页面</div>  
         	 <div class="manngersinout" @click="mannersignout">退出</div>
           </div>
@@ -21,27 +21,25 @@
            	 <button type="button" @click="searchuser(0)" >搜索</button>
            </div>
            <div class="margin10">
-           <div class="usersearch">密码修改</div>
-           <div>
-           	  <span class="editspan">用户名：</span> <span v-if="!username">无</span><span v-if="username">{{username}}</span>
-           	  <span class="editspan">密码：</span> <input type="text" @keyup="keyupdate($event)"  v-model="password" maxlength="13" class="mannerinput" />
-           	  <button type="button" class="mannerbtn" @click="uploaduser">
-           	    <span>保存</span>
-           	   </button>
-           </div>
            </div>
           <div class="usersearch">用户列表</div>
          	<table>
          		<tr>
          			<td>姓名</td>
          			<td>密码</td>
+         			<td>性别</td>
+         			<td>年龄</td>
+         			<td>身高</td>
          			<td>操作</td>
          		</tr>
          		<tr v-for="(item,i) in userarr" v-if="item.authority!=1">
          			<td>{{item.username}}</td>
          			<td><span>******</span></td>
+         			<td>—</td>
+         			<td>—</td>
+         			<td>—</td>
          			<td>
-         				<span class="cchange" @click="updateuser(item)">修改密码</span>
+         				<span class="cchange" @click="updateuser(item)">密码重置</span>
          				<span class="cdelet" @click="deletuser(item)">删除</span>
          			</td>
          		</tr>
@@ -71,7 +69,8 @@ import Loading from 'base/loading/loading'
   	  	Loading
   	  },
   	  created(){
-  	  	 this.getUserMessage();
+  		 this.getUserMessage();
+
   	  },
   	  data(){
   	  	return{
@@ -92,7 +91,8 @@ import Loading from 'base/loading/loading'
   	  		loadingtext:"",
   	  		searchpaging:false,
   	  		username:"",
-  	  		ismannger:true
+  	  		ismannger:true,
+  	  		udpwname:""
   	  	}
   	  },
   	  methods:{
@@ -109,7 +109,6 @@ import Loading from 'base/loading/loading'
       					    this.issuccess=false;
          	                this.$router.replace('/');
 		  	  		},1500);
-      				
       			}
       			
       		})
@@ -117,8 +116,7 @@ import Loading from 'base/loading/loading'
   	  	getUserMessage(){              //获取用户信息
       		
       		axios.post("chat/getUserInfo").then(res=>{
-      			
-      		   
+
       		    if(res.data.code!=1){
       		    	this.$router.replace('/');
       		    	return;
@@ -128,11 +126,7 @@ import Loading from 'base/loading/loading'
       		    }
       		})
       	},
-  	  	keyupdate(ev){
-	        if(ev.keyCode==13){
-		   	   this.uploaduser();
-		   	  }  	  		
-  	  	},
+  	 
   	  	keysearch(ev){
 	        if(ev.keyCode==13){
 	        
@@ -194,49 +188,13 @@ import Loading from 'base/loading/loading'
   	  		
   	  	},
   	  	uploaduser(){
-  	  		if(this.indexid==""){
   	  		
-  	  			if(this.timer){
-  	  				 clearTimeout(this.timer);
-  	  			}
-  	  			this.errortext="请先选择你要修改的信息";
-  	  			this.iserror=true;
-  	  			this.timer=setTimeout(()=>{
-  	  				this.iserror=false;
-  	  			},1500)
-  	  			return;
-  	  		}  
-  	  		if(this.password==""){
-  	  			if(this.timer){
-  	  				 clearTimeout(this.timer)
-  	  			}
-  	  			this.errortext="请输密码"
-  	  			this.iserror=true;
-  	  			this.timer=setTimeout(()=>{
-  	  				this.iserror=false;
-  	  			},1500)
-  	  			
-  	  			return;
-  	  		}  	  		
-  	  		if(this.password.length<6){
-  	  			if(this.timer){
-  	  				 clearTimeout(this.timer)
-  	  			}
-  	  			this.errortext="密码不可小于6位数"
-  	  			this.iserror=true;
-  	  			this.timer=setTimeout(()=>{
-  	  				this.iserror=false;
-  	  			},1500)
-  	  			
-  	  			return;
-  	  		}
-  	  		    this.loadingtext="更新中"
+  	  		    this.loadingtext="重置中"
   	  		    this.isloading=true;
-  	  		    
   	  	 		let params = new URLSearchParams();
   	  	 		  params.append('id', this.indexid);
 			      params.append('username', this.username);
-			      params.append('password', this.password);
+			      params.append('password', 111111);
 				axios({
 				  method: 'post',
 				  url: 'user/updateuser',
@@ -256,7 +214,7 @@ import Loading from 'base/loading/loading'
 						if(this.timer){
 		  	  				 clearTimeout(this.timer)
 		  	  			}
-		  	  			this.errortext="不可更新在线用户"
+		  	  			this.errortext="不可重置在线用户"
 		  	  			this.iserror=true;
 		  	  			this.timer=setTimeout(()=>{
 		  	  				this.iserror=false;
@@ -291,12 +249,11 @@ import Loading from 'base/loading/loading'
 		  	  				this.issuccess=false;
 		  	  			},1500);
 				})
-  	  		
-  	  		
   	  	},
   	  	updateuser(item){    //修改用户
   	  		this.username=item.username;
   	  		this.indexid=item.id;
+  	  		this.uploaduser();
   	  		
   	  	},
   	  	pagingmessage(current){
@@ -319,6 +276,7 @@ import Loading from 'base/loading/loading'
 				    },
 				  data:params
 				}).then(res=>{
+					console.log(res.data.data)
 					this.allpage=parseInt(res.data.message);
 					this.userarr=res.data.data;
 					if(index===2){

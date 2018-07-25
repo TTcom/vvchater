@@ -12,7 +12,7 @@
 		    	 <input type="text"  @keydown="notallownull($event)"    @keyup="debounce" maxlength="13"  placeholder="请输入用户名" v-model="username"/>
 		    </div>
 		    <div class="usererro">
-		       <span  v-if="isSignin && isnothaveuser">用户名未注册</span><span v-if="ishaveuser">该用户名已存在,请重新输入</span><span v-if="isnulluser">用户名不可为空</span>
+		       <span  v-if="isSignin && isnothaveuser">用户名未注册</span><span v-if="ishaveuser">该用户名已存在,请重新输入</span><span v-if="isnulluser">用户名长度不可小于2位</span>
 		    </div>
 		    <div class="logininput marginbottom0">
 		    	   <input type="password"  @keydown="notallownull($event)"  @keyup="testpassword($event)" @focus="getfocus"   maxlength="13"  placeholder="请输入6至13位密码" v-model="password"/>
@@ -108,7 +108,7 @@ import {http} from 'common/js/http'
            },
 			userlogin(){    //聊天用户登录
 				
-				if(this.username===""){
+				if(this.username==="" || this.username.length<2){
 					this.isnulluser=true;
 					return
 				}
@@ -224,7 +224,7 @@ import {http} from 'common/js/http'
 			},
 			userRegister(){
 				
-				if(this.username==""){
+				if(this.username=="" || this.username.length<2){
 					this.isnulluser=true;
 					return;
 				}
