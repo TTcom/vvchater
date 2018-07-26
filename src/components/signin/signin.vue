@@ -9,7 +9,7 @@
 				<span v-if="isSignin">欢迎登录聊天平台</span><span v-if="!isSignin">欢迎注册聊天平台</span>
 			</h2>
 		    <div class="logininput">
-		    	 <input type="text"  @keydown="notallownull($event)"    @keyup="debounce" maxlength="13"  placeholder="请输入用户名" v-model="username"/>
+		    	 <input type="text"  @keydown="notallownull($event)"    @keyup="debounce($event)" maxlength="13"  placeholder="请输入用户名" v-model="username"/>
 		    </div>
 		    <div class="usererro">
 		       <span  v-if="isSignin && isnothaveuser">用户名未注册</span><span v-if="ishaveuser">该用户名已存在,请重新输入</span><span v-if="isnulluser">用户名长度不可小于2位</span>
@@ -21,14 +21,14 @@
 		    	<span v-if="isnullpassword">密码不可为空</span>
 		    	<span v-if="issurelength">密码不可小于6位</span>
 		    	<span v-if="iserrorpassword">密码错误,请重新输入</span>
-		    </div>		    
+		    </div>			
 		    <div class="logininput marginbottom0" v-if="!isSignin">
-		    	   <input type="password" maxlength="13" @keydown="notallownull($event)"  @focus="isnotcommon=false"    placeholder="请再输一遍密码" v-model="passwordagain"/>
+		    	   <input type="password" maxlength="13" @keydown="notallownull($event)"  @keyup="testpassword($event)"  @focus="isnotcommon=false"    placeholder="请再输一遍密码" v-model="passwordagain"/>
 		    </div>
 		    <div class="usererro" v-if="!isSignin">
 		    	<span v-if="isnotcommon && !isSignin">请输入一致的密码</span>
-		    </div>		    		    
-		   
+		    </div>	
+	
 		    <div class="logininput">
 		    	  <button type="button" @click="sinonorin"><span v-if="isSignin">登录</span><span v-if="!isSignin">注册</span></button>
 		    </div>
@@ -175,7 +175,11 @@ import {http} from 'common/js/http'
 				   this.isnullpassword=false
 				   this.iserrorpassword=false
 				   if(ev.keyCode==13){
-				   	   this.userlogin();
+					   	if(this.isSignin){
+						   	   this.userlogin();
+						}else{
+							  this.userRegister();
+						}
 				    }
 				 } 
 			},
@@ -207,12 +211,17 @@ import {http} from 'common/js/http'
 					}
 				})
 			},
-			debounce(){   //请求节流
+			debounce(ev){   //请求节流
 				if(this.username!=""){
 			 	   this.isnulluser=false;
 			    }
 				if(this.username===""){
 					this.isnothaveuser=false;
+				}
+				if(ev.keyCode==13){
+					if(this.isSignin){
+					   	   this.userlogin();
+					}
 				}
 			     if(timer){
 			       	clearTimeout(timer)
@@ -272,7 +281,7 @@ import {http} from 'common/js/http'
 
 					}else{       //注册
 						
-						this.userRegister();
+						   this.userRegister();
 					}
 
 				
@@ -281,6 +290,14 @@ import {http} from 'common/js/http'
 				this.username="";
 				this.password="";
 				this.passwordagain="";
+				this.issurelength=false;
+				this.isnothaveuser=false;
+				this.ishaveuser=false;
+				this.isnullpassword=false;
+				this.isnulluser=false;
+				this.issurelength=false;
+				this.iserrorpassword=false;
+				this.isnotcommon=false;
 			},
 			contorlmusic(){
 			   if(this.isplay){
@@ -292,8 +309,10 @@ import {http} from 'common/js/http'
 			   }
 			},
 			signup(){
-				this.clearall();
-			  this.isSignin=!this.isSignin
+					this.clearall();
+			        this.isSignin=!this.isSignin
+					
+			
 			}
 		}
 		
@@ -309,7 +328,7 @@ import {http} from 'common/js/http'
 		}	
 	  .login{
 	  	z-index:2;
-	  	width: 450px;
+	  	width: 390px;
 	  	height: 350px;
 	  	background-color:white;
 	  	border-radius: 5px;
@@ -320,6 +339,7 @@ import {http} from 'common/js/http'
        	right: 0;
        	margin: auto; 
        	transition: height .5s;	
+       	overflow: hidden;
        	h2{
        		color: black;
        		font-size: 30px;
@@ -349,7 +369,7 @@ import {http} from 'common/js/http'
        		}
        		button{
        			height: 40px;
-       			background-color: #28a745;
+       			background-color: #5cb85c;
        			color: white;
        			width:80%;
        			text-align: center;
@@ -358,6 +378,10 @@ import {http} from 'common/js/http'
        			font-size: 15px;
        		    border-radius: 5px;
        		    cursor: pointer;
+       		    transition: all .4s;
+       		}
+       		button:hover{
+       			background-color: green;
        		}
        	}
        	.usererro{

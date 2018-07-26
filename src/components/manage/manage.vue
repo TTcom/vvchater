@@ -1,20 +1,16 @@
 <template>
-	<div v-show="ismannger">
-		
+	<div>
         <div class="mannertitle">
            <div class="titleinner">
-        	 <div>欢迎进入后台管理页面</div>  
+        	 <div>后台用户管理</div>  
         	 <div class="manngersinout" @click="mannersignout">退出</div>
           </div>
         </div>
         <error :errortext="errortext" v-if="iserror"></error>
         <loading :loadingtext="loadingtext" v-if="isloading"></loading>
         <success v-if="issuccess" :successtext="successtext"></success>
-         <div>
-         	<frame @sure="sure" @cannel="cannel" ref="frame"></frame>
-         </div>
+        <frame @sure="sure" @cannel="cannel" ref="frame"></frame>
          <div class="content">
-         	
            <div class="usersearch">用户搜索</div>
            <div class="searchinput">
            	 <input type="text"  v-model="searchtext" @keyup="keysearch($event)"/>
@@ -91,7 +87,6 @@ import Loading from 'base/loading/loading'
   	  		loadingtext:"",
   	  		searchpaging:false,
   	  		username:"",
-  	  		ismannger:true,
   	  		udpwname:""
   	  	}
   	  },
@@ -100,15 +95,16 @@ import Loading from 'base/loading/loading'
   	  		axios.post("chat/signOut").then(res=>{
       			
       			if(res.data.code===0){
-      				this.successtext="退出成功";
-      				this.issuccess=true;
-      				if(this.timer){
-		  	  		   clearTimeout(this.timer)
-		  	  		}
-      				this.timer=setTimeout(()=>{
-      					    this.issuccess=false;
-         	                this.$router.replace('/');
-		  	  		},1500);
+      				 this.$router.replace('/');
+//    				this.successtext="退出成功";
+//    				this.issuccess=true;
+//    				if(this.timer){
+//		  	  		   clearTimeout(this.timer)
+//		  	  		}
+//    				this.timer=setTimeout(()=>{
+//    					    this.issuccess=false;
+//       	               
+//		  	  		},1500);
       			}
       			
       		})
@@ -121,7 +117,6 @@ import Loading from 'base/loading/loading'
       		    	this.$router.replace('/');
       		    	return;
       		    }else{
-      		    	 this.ismannger=true;
       		    	 this.getusermessage(1);
       		    }
       		})
@@ -377,6 +372,7 @@ import Loading from 'base/loading/loading'
 }	
 .content{
 	min-height: 500px;
+	background-color: white;
 	width: 1000px;
 	border: 1px solid #DCDCDC;
 	margin: auto;

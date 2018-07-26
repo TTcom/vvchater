@@ -2,27 +2,12 @@
 	<div>
 		<success :successtext="successmsg" v-if="successsignout"></success>
 	   <progressbar v-if="isprogressbar" :speed="speed" :sendtext="sendtext"></progressbar>
-		<div class="chatheader">
-		<div class="chatindex">	
-			<div>欢迎进入聊天室</div> 
-			<div>
-	          <div class="bbn11">
-					<input type="file"  ref="picers"  @change="uploadpice(1)"  class="videos11"  id="image"/>
-					<div class="nn11" > 
-						<div class="isjiahao11"> <img  :src="userpicpath" class="usertouxiang"/> </div>
-					</div>
-				</div> 
-				<span>{{username}}</span>
-				<span class="logininout" @click="signout">退出</span>
-			</div>
-		</div>
-		</div>
 	<div class="containerss">
 		  <div  class="box">
 		  	 
 		  	<div class="right">
 		  		<div class="righttile gayslisttitle">
-		  			<span class="fontweight">{{talktitle}}</span>
+		  			<span class="fontweight rtalktitle">{{talktitle}}</span>
 		  		</div>
 		  		<div class="rightmiddle1">
 		  		   
@@ -31,7 +16,7 @@
 			  				<span>{{item.senderName}}</span>&ensp;<span>({{item.date}})</span>
 			  			</div>
 		  			    <div class="usermessage" v-if="!item.fileType">
-		  			    	<p>{{item.messageBody}}</p> 
+		  			    	<p v-html="item.messageBody"></p> 
 		  			    </div>
 		  			    <div class="usermessage" v-if="item.fileType==1">
 		  			    	<img :src="item.messageBody"/>
@@ -44,8 +29,8 @@
 		  			
 		  		</div>
 
-		  		<div style="height: 35%;border-top: 1px solid #DCDCDC;">
-		  			<div style="padding-left: 10px;height: 10%;">
+		  		<div style="height: 35%;">
+		  			<div style="padding-left: 10px;height: 10%;border-top: 1px solid #d6d6d6;margin: 0 15px">
 					          <div class="bbn">
 									<input type="file"  @change="uploadpice" ref="picersss"  name="video" class="videos"  id="image"/>
 									<div class="nn" > 
@@ -53,29 +38,56 @@
 									</div>
 								</div> 
 		  			</div>
-		  			<div style="height: 70%;">
-		  				<textarea class="sendmessage" id="textareaenter" v-model="sendmessage"></textarea>
+		  			<div style="height: 70%;padding: 0 15px;">
+		  				<textarea  class="sendmessage" @keydown="testsend($event)"  id="textareaenter" v-model="sendmessage"></textarea>
 		  				
 		  			</div>
 		  			<div class="bottombtn">
-		  				<button  type="button" class="sendbtn" @click="websocketsend()">发送</button>
+		  		        <span class="point">按下Ctrl+Enter换行</span>
+		  				<button  type="button" class="sendbtn"   @click="websocketsend()">发送</button>
 		  			</div>
 		  		</div>
 		  	</div>
-		  	<div  class="gayslist" style="border: none;border-left: 1px solid #DCDCDC;">
-		  		<div class="gayslisttitle gayslisttitlebordertop">
-		  	  		聊天列表
+		  	<div  class="gayslist" style="border: none;background-color: #2e3138;">
+		  		<div class="rightlistitle gayslisttitlebordertop">
+		  	  		
+		  	  		<div style="padding: 0 10px;">
+			          <div class="bbn11">
+							<input type="file"  ref="picers"  @change="uploadpice(1)"  class="videos11"  id="image"/>
+							<div class="nn11" > 
+								<div class="isjiahao11"> <img  :src="userpicpath" class="usertouxiang"/> </div>
+							</div>
+						</div> 
+		  	  			<span>{{username}}</span>
+		  	  		</div>
+		  	  	 <div class="titleright" @click="signout">
+		  	    	<img src="./signout.png"  />
+		  	    	<span>退出</span>
 		  	    </div>
-		  	  <div class="talkfriendlist">
+
+		  	    </div>
+		  	   <div class="searchuser">
+		  	    	<input type="text" v-model="searchuser" @keyup="testpassword($event)"  maxlength="13"  placeholder="用户搜索" />
+		  	    	<img src="./search.png" v-show="!entersearch"/>
+		  	    	<span class="clearsearch" v-show="entersearch" @click="cannelsearch">x</span>
+		  	   </div>
+		  	    
+		  	 <div class="talkfriendlist">
 		  	  	<div class="kefuone" :class="{cbgray:inlineindex==999}" @click="talkinbroad">
-		  	  		<span class="fontweight">广播</span><span class="cred" v-show="isnewborad">有{{broadcastnumber}}条新消息啦</span>
+		  	  		<span class="fontweight positionrelative" >
+		  	  			广播
+		  	  		<span class="cred" v-show="isnewborad">{{broadcastnumber}}</span>
+		  	  		</span>
 		  	  	</div>		 
 		  	  	
 		       <div  v-for="(item,i) in userlist" v-if="item.username!=username" class="kefuone" :class="{cbgray:i==inlineindex}" @click="friendtalk(i,item)">
-		  	  		<span>{{item.username}}</span><span class="cred" v-show="item.isnewmessage">有{{item.messagenumber}}条新消息啦</span>
+		  	  		<span class="positionrelative">
+		  	  			{{item.username}}
+		  	  		  <span class="cred" v-show="item.isnewmessage">{{item.messagenumber}}</span>
+		  	  		</span>
 		  	   </div>
 		  	  </div>
-		  	  <div class="messageprompt">
+		  	 <div class="messageprompt">
 		  	  	<span>消息提示</span>
 		  	  </div>
 		  	  <div class="promptlist">
@@ -87,11 +99,6 @@
 		  	  	</ul>
 		  	  	
 		  	  </div>
-		  	   <div class="searchuser">
-		  	    	<input type="text" v-model="searchuser" @keyup="testpassword($event)"  maxlength="13"  placeholder="用户搜索" />
-		  	    	<img src="./search.png" v-show="!entersearch"/>
-		  	    	<span class="clearsearch" v-show="entersearch" @click="cannelsearch">x</span>
-		  	   </div>
 		  	  <div>
 		  	  	
 		  	  </div>
@@ -145,7 +152,8 @@
       		promptlistarr:[],
       	    searchuserlist:[],
       	    entersearch:false,
-      	    broadcastnumber:0
+      	    broadcastnumber:0,
+
       	}
       },
       created(){
@@ -153,6 +161,29 @@
       	 this.getUserMessage();
       },  
       methods:{
+
+      	testsend(ev){
+
+      		 if( ev.ctrlKey && ev.keyCode == 13 )   
+				{   
+				     this.sendmessage=this.sendmessage+"\n";
+				     console.log(this.sendmessage)
+                    return;
+				}
+			
+			if(ev.keyCode==13){
+				if (window.event) {
+					console.log(35235235)
+					window.event.returnValue = false;
+	                this.websocketsend();
+	            }else{
+	            	 console.log(35235235)
+	               	  ev.preventDefault(); //for firefox
+	               	  this.websocketsend();
+	             }
+			}
+
+      	},
       	cannelsearch(){
       		this.entersearch=false;
       		this.searchuser="";
@@ -227,6 +258,7 @@
       		axios.post("chat/signOut").then(res=>{
       			
       			if(res.data.code===0){
+      				this.websock.close();
       				this.$router.replace('/');
 //    				this.successsignout=true;
 //    				if(this.timer){
@@ -461,12 +493,15 @@
         	 
         },
         websocketsend(){   //发送消息
-        	
+ 
        	    if(this.inlineindex==999){    //发送广播
        		   	
        		   if(this.filepath=="" && this.picpath==""){
 		        	if(this.sendmessage==""){
 		        		return;
+		        	}else{
+		        		var reg = new RegExp("\n", "g");
+						this.sendmessage = this.sendmessage.replace(reg, "<br/>");
 		        	}
 	       		   	  var data={
 	              	  "messageType":0,
@@ -500,8 +535,10 @@
             	if(this.filepath=="" && this.picpath==""){
 			        	if(this.sendmessage==""){
 			        		return;
+			        	}else{
+			        		var reg = new RegExp("\n", "g");
+							this.sendmessage = this.sendmessage.replace(reg, "<br/>");
 			        	}
-            		
 	       		   	   var data={  
 		              	  "messageType":1,
 		              	  "senderId":this.userid,
@@ -543,6 +580,7 @@
         	  this.filepath="";
         	  this.filenames="";
         	  this.picpath="";
+        	  console.log(this.sendmessage)
         },
         callback1(progressEvent){
         	
@@ -657,17 +695,22 @@
  	}
  	
  	.containerss {
- 		max-width: 1000px;
+ 		max-width: 1100px;
  		margin: 0 auto;
  		padding: 0 20px;
- 		margin-bottom: 50px;
+ 		position: fixed;
+ 		top: 10px;
+ 		bottom: 10px;
+ 		left: 0;
+ 		right: 0;
+ 		margin: auto;
+ 		
  	}
  	
  	.box {
  		width: 100%;
- 		height: 600px;
- 		background-color: white;
- 		border: 1px solid #DCDCDC;
+ 		height: 100%;
+ 		background-color: #EEEEEE;
  		display: flex;
  		flex-direction: row;
  		justify-content: flex-start;
@@ -681,32 +724,40 @@
  		flex-direction: column;
  		justify-content: flex-start;
  		.searchuser{
- 			position:relative;
- 			padding-left: 10px;
+ 			position: relative;
+		    padding: 10px;
+		    background-color: #2e3138;
+		    height: 40px;
+		    padding-top: 0px;
+		    padding-bottom: 15px;
  			input{
  				    border: none;
 				    outline: none;
 				    height: 32px;
 				    padding-top: 3px;
 				    width: 100%;
+				    background-color: black;
+				    color: #a9abae;
+				    border-radius: 3px;
+				    text-indent: 8px;
  			}
  			img{
  				position: absolute;
-			    right: 6px;
-			    top: 11px;
+			    right:13px;
+			    top: 10px;
 			    height: 21px;
 			    width: 21px;
 			    cursor: pointer;
  			}
  			.clearsearch{
  				position: absolute;
-			    right: 6px;
+			    right: 15px;
 			    top: 12px;
 			    height: 18px;
 			    width: 18px;
 			    border-radius: 50%;
-			    background-color: black;
-			    color: white;
+			    background-color: white;
+			    color: black;
 			    font-size: 14px;
 			    text-align: center;
 			    line-height: 16px;
@@ -716,36 +767,50 @@
  	}
  	.talkfriendlist{
  		overflow: auto;
- 		height: 61.7%;
-        border-bottom: 1px solid #dcdcdc;
+ 		height: 60%;
+        border-bottom: 1px solid #333b47;
 
  	}
  	.messageprompt{
- 		height: 20px;
- 		line-height: 20px;
+ 		height: 30px;
+ 		line-height: 30px;
  		width: 100%;
- 		span{padding-left: 10px;}
- 		border-bottom:1px solid #dcdcdc;
+ 		span{padding-left: 10px;color: white;}
+ 
  	}
  	.promptlist{
  		height: 23%;
  		overflow: auto;
- 		border-bottom: 1px solid #DCDCDC;
  		ul li{
  			padding-left:10px ;padding-bottom: 5px;padding-top: 5px;font-size: 13px;
- 			color:green;
+ 			color:#5cb85c;
  			 .pdate{padding-left: 10px;}
  			}
- 		.cpred{color: red;}
+ 		.cpred{color: #f0ad4e;}
  	}
- 	.gayslisttitle {
+ 	.rightlistitle {
  		font-size: 15px;
  		font-weight: bold;
- 		text-align: center;
  		width: 100%;
- 		height: 5%;
- 		line-height: 33px;
- 		border-bottom: 1px solid #DCDCDC;
+ 		height: 10%;
+ 		background-color: #2e3138;
+ 		@include list(row,space-between,center,nowrap);
+ 		color:white;
+ 		font-size:15px;
+ 		img{
+ 			height: 35px;
+ 			width: 35px;
+ 			vertical-align: middle;
+ 			padding-right: 5px;
+ 		}
+ 	}
+ 	.titleright{
+ 		margin-right: 10px;
+ 		cursor: pointer;
+ 		img{
+ 			width: 20px;
+ 			height: 20px;
+ 		}
  	}
  	
  	textarea {
@@ -755,22 +820,32 @@
  	}
  	
  	.kefuone {
- 		padding-bottom: 10px;
+ 		padding-bottom: 15px;
  		padding-left: 30px;
- 		padding-top: 10px;
- 		border-bottom: 1px solid #dcdcdc;
+ 		padding-top: 15px;
+ 		color: white;
  		cursor: pointer;
+ 		.positionrelative{position: relative;}
  		img{
  				vertical-align: middle;
  			}
  		.cred{
- 			color: red;
- 			padding-left: 20px;
+ 			position: absolute;
+		    color: white;
+		    height: 20px;
+		    width: 20px;
+		    background-color: red;
+		    text-align: center;
+		    line-height: 20px;
+		    display: inline-block;
+		    border-radius: 50%;
+		    top: -4px;
+            right: -23px;
  		}	
  	}
  	
  	.cbgray {
- 		background-color: #DCDCDC;
+ 		background-color: #333b47;
  	}
  	
  	.left {
@@ -792,22 +867,26 @@
  	}
  	
  	.righttile {
- 		height: 5%;
+ 		height: 7%;
  		text-align: center;
  		font-size: 15px;
- 		line-height: 33px;
- 		border-bottom: 1px solid #DCDCDC;
+ 		line-height: 40px;
+ 		.rtalktitle{
+ 		  display: inline-block;
+ 		  width:96%;
+ 		  border-bottom: 1px solid #d6d6d6;
+ 		}
  	}
  	
  	.sendmessage {
  		height: 100%;
  		width: 100%;
- 		padding: 6px;
  		font-size: 15px;
+ 		background-color: #EEEEEE;
  	}
  	
  	.rightmiddle1 {
- 		height: 60%;
+ 		height: 58%;
  		overflow-y: auto;
  		padding: 15px;
  	}
@@ -864,8 +943,8 @@
  		width: 20px;
  	}
  	.bbn11 {
- 		height: 30px;
- 		width: 30px;
+ 		height: 35px;
+ 		width: 35px;
  		overflow: hidden;
  		color: #CCCCCC;
  		font-size: 18px;
@@ -881,10 +960,10 @@
  	}
  	
  	.videos11 {
- 		width: 30px !important;
+ 		width: 35px !important;
  		padding-left: 0px;
  		background-color: red;
- 		height: 30px;
+ 		height: 35px;
  		cursor: pointer;
  		outline: none;
  		border: none;
@@ -902,9 +981,9 @@
  		cursor: pointer;
  		display: inline-block;
  		font-size: 12px;
- 		height: 30px;
- 		line-height: 30px;
- 		min-width: 30px;
+ 		height: 35px;
+ 		line-height: 35px;
+ 		min-width: 35px;
  		overflow: hidden;
  	}
  	
@@ -913,8 +992,8 @@
  	}
  	
  	.isjiahao11 img {
- 		height: 30px;
- 		width: 30px;
+ 		height: 35px;
+ 		width: 35px;
  	}
 
  	.bottombtn{
@@ -922,13 +1001,22 @@
         text-align: right; 
         padding-top: 7px;
        padding-right: 10px;
+       .point{
+       	font-size: 13px;
+       	padding-right: 10px;
+       	color: #989898;
+       }
  	}
  	.sendbtn{
- 		background-color: deepskyblue;width: 100px;height: 30px;text-align: center;color: white;
- 		outline: none;
- 		border: none;
- 		border-radius: 5px;
- 		cursor: pointer;
+ 		background-color: white;
+	    width: 100px;
+	    height: 30px;
+	    text-align: center;
+	    color: black;
+	    outline: none;
+	    border: 1px solid #989898;
+	    border-radius: 3px;
+	    cursor: pointer;
  	}
  	.fontweight{
  			font-weight: bold;
@@ -952,7 +1040,7 @@
  			padding-left: 10px;
  		}
  		img{
- 			width: 50px;
+ 			max-width: 250px;
  		}
  	}
  	@media only screen and (max-width: 768px) {
