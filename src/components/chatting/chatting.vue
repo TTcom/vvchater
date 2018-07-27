@@ -5,7 +5,7 @@
 	<div class="containerss">
 		  <div  class="box">
 		  	 
-		  	<div class="right">
+		  	<div class="ltalkcontent">
 		  		<div class="righttile gayslisttitle">
 		  			<span class="fontweight rtalktitle">{{talktitle}}</span>
 		  		</div>
@@ -29,8 +29,8 @@
 		  			
 		  		</div>
 
-		  		<div style="height: 35%;">
-		  			<div style="padding-left: 10px;height: 10%;border-top: 1px solid #d6d6d6;margin: 0 15px">
+		  		<div class="talkbottom">
+		  			<div class="talkloadfile">
 					          <div class="bbn">
 									<input type="file"  @change="uploadpice" ref="picersss"  name="video" class="videos"  id="image"/>
 									<div class="nn" > 
@@ -38,7 +38,7 @@
 									</div>
 								</div> 
 		  			</div>
-		  			<div style="height: 70%;padding: 0 15px;">
+		  			<div class="tbottomwrite">
 		  				<textarea  class="sendmessage" @keydown="testsend($event)"  id="textareaenter" v-model="sendmessage"></textarea>
 		  				
 		  			</div>
@@ -48,10 +48,10 @@
 		  			</div>
 		  		</div>
 		  	</div>
-		  	<div  class="gayslist" style="border: none;background-color: #2e3138;">
+		  	<div  class="gayslist">
 		  		<div class="rightlistitle gayslisttitlebordertop">
 		  	  		
-		  	  		<div style="padding: 0 10px;">
+		  	  		<div class="gayusermessage">
 			          <div class="bbn11">
 							<input type="file"  ref="picers"  @change="uploadpice(1)"  class="videos11"  id="image"/>
 							<div class="nn11" > 
@@ -156,12 +156,36 @@
 
       	}
       },
+      watch:{
+      	  userlist(){
+        	        setTimeout(()=>{
+      					var obj = document.getElementsByClassName('talkfriendlist')[0]
+		                      obj.scrollTop= obj.scrollHeight;   
+		  	  		},300);      			        	 	     
+      	  	      
+      	  },
+      	  promptlistarr(){
+         	        setTimeout(()=>{
+      					var obj = document.getElementsByClassName('promptlist')[0]
+		                      obj.scrollTop= obj.scrollHeight;   
+		  	  		},300);      			        	 	     
+      	  	      
+      	  }
+      },
       created(){
      	 sessionStorage.clear()
       	 this.getUserMessage();
+      	 setInterval(this.keepalive,29*60*1000)
       },  
       methods:{
-
+        
+        keepalive(){
+        	axios.post("chat/keepAlive").then(res=>{
+        		
+        		console.log(res);
+        	})
+        	
+        },
       	testsend(ev){
 
       		 if( ev.ctrlKey && ev.keyCode == 13 )   
@@ -219,7 +243,7 @@
         	        setTimeout(()=>{
       					var obj = document.getElementsByClassName('rightmiddle1')[0]
 		                      obj.scrollTop= obj.scrollHeight;   
-		  	  		},500);      			        	 	     
+		  	  		},300);      			        	 	     
         	 	}else{
         	 		this.broadcast=[];
         	 	}
@@ -247,7 +271,7 @@
         	        setTimeout(()=>{
       					var obj = document.getElementsByClassName('rightmiddle1')[0]
 		                      obj.scrollTop= obj.scrollHeight;   
-		  	  		},500);      			
+		  	  		},300);      			
       			
       		}else if(this.broadarr.length==0){
       			this.broadcast=[];
@@ -280,16 +304,17 @@
       		    console.log(res);
       		    if(res.data.code===3){
       		    	this.$router.replace('/');
-      		    	return;
-      		    }
-        	   this.username = res.data.data.user.username;
-        	   if(res.data.data.user.picpath){
-        	   	this.userpicpath = res.data.data.user.picpath;
-        	   }
-      		   this.userid=res.data.data.user.id;
-      		   this.serverip=res.data.message;
-      		   console.log("serverip"+this.serverip);      
-      		   this.initWebSocket();
+      		    	
+      		    }else{
+	        	   this.username = res.data.data.user.username;
+	        	   if(res.data.data.user.picpath){
+	        	   	this.userpicpath = res.data.data.user.picpath;
+	        	   }
+	      		   this.userid=res.data.data.user.id;
+	      		   this.serverip=res.data.message;
+	      		   console.log("serverip"+this.serverip);      
+	      		   this.initWebSocket();
+      		   }
       		})
       	},
       	initWebSocket(){ //初始化weosocket
@@ -332,7 +357,7 @@
         	 setTimeout(()=>{
       			var obj = document.getElementsByClassName('rightmiddle1')[0]
 		                  obj.scrollTop= obj.scrollHeight;   
-		  	 },500);
+		  	 },300);
 
         	 	console.log("广播"+this.broadcast)
         
@@ -415,7 +440,7 @@
         	 	  setTimeout(()=>{
       					var obj = document.getElementsByClassName('rightmiddle1')[0]
 		                      obj.scrollTop= obj.scrollHeight;   
-		  	  		},500);        	 	
+		  	  		},300);        	 	
         	 	}else{   //如果发送者不是当前用户
         	 		
         	 	var valuee=sessionStorage.getItem(message.senderName);
@@ -461,7 +486,7 @@
         	 	  setTimeout(()=>{
       					var obj = document.getElementsByClassName('rightmiddle1')[0]
 		                      obj.scrollTop= obj.scrollHeight;   
-		  	  		},500);        	 	
+		  	  		},300);        	 	
         	 		
         	 	}
         	 }else if(message.messageType==3){  //接收下线的人
@@ -695,26 +720,23 @@
  	}
  	
  	.containerss {
- 		max-width: 1100px;
- 		margin: 0 auto;
- 		padding: 0 20px;
- 		position: fixed;
- 		top: 10px;
- 		bottom: 10px;
- 		left: 0;
- 		right: 0;
- 		margin: auto;
- 		
+		    margin: 0 auto;
+		    overflow: auto;
+		    padding-right: 17px;
+		    width: 100%;
+		    height: 100vh;	
  	}
  	
  	.box {
- 		width: 100%;
  		height: 100%;
  		background-color: #EEEEEE;
  		display: flex;
  		flex-direction: row;
  		justify-content: flex-start;
  		font-size: 15px;
+ 		min-height: 688px;
+ 		width: 1100px;
+         margin: 0 auto;
  	}	
  	
  	.gayslist {
@@ -723,6 +745,8 @@
  		display: flex;
  		flex-direction: column;
  		justify-content: flex-start;
+ 		border: none;background-color: #2e3138;
+ 		overflow: hidden;
  		.searchuser{
  			position: relative;
 		    padding: 10px;
@@ -769,18 +793,25 @@
  		overflow: auto;
  		height: 60%;
         border-bottom: 1px solid #333b47;
+        width: 100%;
+        padding-right: 17px;
 
  	}
  	.messageprompt{
  		height: 30px;
  		line-height: 30px;
  		width: 100%;
+ 		white-space: nowrap;
+        overflow: hidden;
  		span{padding-left: 10px;color: white;}
  
  	}
  	.promptlist{
  		height: 23%;
  		overflow: auto;
+ 		white-space: nowrap;
+ 		width: 100%;
+        padding-right: 17px;
  		ul li{
  			padding-left:10px ;padding-bottom: 5px;padding-top: 5px;font-size: 13px;
  			color:#5cb85c;
@@ -794,6 +825,7 @@
  		width: 100%;
  		height: 10%;
  		background-color: #2e3138;
+ 		overflow: hidden;
  		@include list(row,space-between,center,nowrap);
  		color:white;
  		font-size:15px;
@@ -804,13 +836,19 @@
  			padding-right: 5px;
  		}
  	}
+ 	.gayusermessage{
+ 		padding: 0 10px;white-space: nowrap;
+ 	}
  	.titleright{
  		margin-right: 10px;
  		cursor: pointer;
+ 		white-space: nowrap;
  		img{
  			width: 20px;
  			height: 20px;
+ 			vertical-align: middle;
  		}
+ 		span{vertical-align: middle;}
  	}
  	
  	textarea {
@@ -831,16 +869,13 @@
  			}
  		.cred{
  			position: absolute;
-		    color: white;
-		    height: 20px;
-		    width: 20px;
+		    color: #fff;
 		    background-color: red;
-		    text-align: center;
-		    line-height: 20px;
 		    display: inline-block;
-		    border-radius: 50%;
-		    top: -4px;
-            right: -23px;
+		    border-radius: 5px;
+		    top: 0px;
+		    right: -69px;
+		    padding: 4px 9px;
  		}	
  	}
  	
@@ -848,22 +883,12 @@
  		background-color: #333b47;
  	}
  	
- 	.left {
- 		padding-top: 10px;
- 		width: 10%;
- 		display: flex;
- 		flex-direction: column;
- 		justify-content: flex-start;
- 		border-right: 1px solid #DCDCDC;
- 		align-items: center;
- 		background-color: #f2f2f2;
- 	}
- 	
- 	.right {
+ 	.ltalkcontent {
  		width: 70%;
  		display: flex;
  		flex-direction: column;
  		justify-content: flex-start;
+ 		overflow: hidden;
  	}
  	
  	.righttile {
@@ -871,24 +896,44 @@
  		text-align: center;
  		font-size: 15px;
  		line-height: 40px;
+ 		overflow: hidden;
  		.rtalktitle{
  		  display: inline-block;
  		  width:96%;
  		  border-bottom: 1px solid #d6d6d6;
  		}
  	}
- 	
+ 	.talkbottom{
+ 		height: 35%;
+ 		overflow: hidden;
+ 		.talkloadfile{
+ 			padding-left: 10px;height: 10%;border-top: 1px solid #d6d6d6;margin: 0 15px;
+ 			overflow: hidden;
+ 		}
+ 		.tbottomwrite{
+ 			height: 70%;padding: 0 15px;
+ 		}
+ 	}
  	.sendmessage {
  		height: 100%;
- 		width: 100%;
- 		font-size: 15px;
- 		background-color: #EEEEEE;
+	    width: 100%;
+	    font-size: 14px;
+	    background-color: #eee;
+	    color: #000;
+	    font-weight: 400;
+	    font-style: normal;
+	    font-family: inherit;
  	}
  	
  	.rightmiddle1 {
- 		height: 58%;
- 		overflow-y: auto;
- 		padding: 15px;
+		 	height: 58%;
+		    overflow-y: auto;
+		    width: 100%;
+		    padding-right: 17px;
+		    padding-left: 15px;
+		    padding-top: 10px;
+		    padding-bottom: 10px;
+		    overflow-x: hidden;
  	}
  		
  	.bbn {
@@ -1001,6 +1046,7 @@
         text-align: right; 
         padding-top: 7px;
        padding-right: 10px;
+       white-space: nowrap;
        .point{
        	font-size: 13px;
        	padding-right: 10px;
@@ -1043,34 +1089,9 @@
  			max-width: 250px;
  		}
  	}
- 	@media only screen and (max-width: 768px) {
- 		.box {
- 			height: auto;
- 			flex-direction: column;
- 		}
- 		.left {
- 			width: 100%;
- 		}
- 		.gayslist {
- 			width: 100%;
- 			flex-direction: column;
- 			border-bottom: 1px solid #dcdcdc;
- 		}
- 		.kefuone {
- 			padding: 10px;
- 			
- 		}
- 		.right {
- 			width: 100%;
- 			height: 700px;
- 		}
- 		.sendmessage{
- 			width: 96%;
- 			padding: 0 2%;
- 		}
- 		.gayslisttitlebordertop{
- 		   border-top: 1px solid #DCDCDC;	
- 		}
+ 	/*@media only screen and (max-width: 768px) {
  		
- 	}
+ 		
+ 		
+ 	}*/
 </style>

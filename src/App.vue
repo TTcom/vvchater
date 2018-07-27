@@ -12,8 +12,8 @@
 	export default{
 		 
 		created(){
-//			this.$router.replace({
-//								     path:'/chatting'
+//			     this.$router.replace({
+//								     path:'/manage'
 //							     })		
 			axios.post("chat/getUserInfo").then(res=>{
 				        console.log(res);

@@ -10,6 +10,7 @@
         <loading :loadingtext="loadingtext" v-if="isloading"></loading>
         <success v-if="issuccess" :successtext="successtext"></success>
         <frame @sure="sure" @cannel="cannel" ref="frame"></frame>
+        <div class="mannermain">
          <div class="content">
            <div class="usersearch">用户搜索</div>
            <div class="searchinput">
@@ -43,7 +44,8 @@
          	</table>
          	<paging ref="paginger"  @pages="pagingmessage"  :showItem="showItem" :allpage="allpage"></paging>
          </div>      
-		
+	
+		</div>
 	</div>
 
 	</div>
@@ -112,13 +114,15 @@ import Loading from 'base/loading/loading'
   	  	getUserMessage(){              //获取用户信息
       		
       		axios.post("chat/getUserInfo").then(res=>{
-
-      		    if(res.data.code!=1){
+                
+                console.log(res);
+                if(res.data.code===1){
+                	this.getusermessage(1);
+      		    	
+      		   }else{
       		    	this.$router.replace('/');
-      		    	return;
-      		    }else{
-      		    	 this.getusermessage(1);
-      		    }
+      		   }
+                
       		})
       	},
   	 
@@ -165,13 +169,18 @@ import Loading from 'base/loading/loading'
 				    },
 				  data:params
 				}).then(res=>{
-					this.isloading=false;
-					console.log(res);
-					  if(current==0){
-					  	this.$refs.paginger.current=1;
-					  }
-					this.allpage=parseInt(res.data.message);
-					this.userarr=res.data.data;
+					if(res.data.code==3){
+						this.$router.replace('/');
+						
+					}else{
+						this.isloading=false;
+						console.log(res);
+						  if(current==0){
+						  	this.$refs.paginger.current=1;
+						  }
+						this.allpage=parseInt(res.data.message);
+						this.userarr=res.data.data;
+					}
 				})
 	
   	  		}
@@ -215,7 +224,11 @@ import Loading from 'base/loading/loading'
 		  	  				this.iserror=false;
 		  	  			},1500)
 						
-					}
+					}else if(res.data.code==3){
+						this.$router.replace('/');
+						
+					 }
+
 				})	
   	  		
   	  	},
@@ -232,17 +245,24 @@ import Loading from 'base/loading/loading'
 				    },
 				  data:params
 				}).then(res=>{
+					
+					if(res.data.code==3){
+						this.$router.replace('/');
+						
+					 }else{
+					
 					this.allpage=parseInt(res.data.message);
 					this.userarr=res.data.data;
                     this.isloading=false;
 		  	  			if(this.timer){
 		  	  				 clearTimeout(this.timer)
 		  	  			}
-		  	  			this.successtext="更新成功"
+		  	  			this.successtext="重置成功"
 		  	  			this.issuccess=true;
 		  	  			this.timer=setTimeout(()=>{
 		  	  				this.issuccess=false;
 		  	  			},1500);
+		  	  		}
 				})
   	  	},
   	  	updateuser(item){    //修改用户
@@ -271,11 +291,16 @@ import Loading from 'base/loading/loading'
 				    },
 				  data:params
 				}).then(res=>{
-					console.log(res.data.data)
-					this.allpage=parseInt(res.data.message);
-					this.userarr=res.data.data;
-					if(index===2){
-						this.$refs.paginger.current=1;
+					if(res.data.code==3){
+						this.$router.replace('/');
+					
+					}else{
+						console.log(res.data.data)
+						this.allpage=parseInt(res.data.message);
+						this.userarr=res.data.data;
+						if(index===2){
+							this.$refs.paginger.current=1;
+						}
 					}
 				})	
   	  	},
@@ -335,6 +360,8 @@ import Loading from 'base/loading/loading'
 		  	  			this.timer=setTimeout(()=>{
 		  	  				this.iserror=false;
 		  	  			},1500)
+					}else if(res.data.code===4){
+						this.$router.replace('/');
 					}
 
 				});
@@ -369,15 +396,21 @@ import Loading from 'base/loading/loading'
 		color: red;
 		cursor: pointer;
 	}
-}	
+}
+.mannermain{
+	height: 100vh;
+    overflow: auto;
+    width: 100%;
+    padding-right: 17px;	
 .content{
-	min-height: 500px;
-	background-color: white;
-	width: 1000px;
-	border: 1px solid #DCDCDC;
-	margin: auto;
-	margin-top: 20px;
-	padding: 15px;
+	background-color: #fff;
+    border: 1px solid #dcdcdc;
+    min-height: 500px;
+    padding: 15px;
+    margin: auto;
+    margin-top: 30px;
+    width: 1000px;
+    overflow: auto;
 	.usersearch{
 		font-size: 15px;
 		margin:15px 0;
@@ -451,7 +484,7 @@ import Loading from 'base/loading/loading'
 	}
 }	
 	
-	
+}	
 	
 	
 </style>

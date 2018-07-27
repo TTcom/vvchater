@@ -9,10 +9,10 @@
 				<span v-if="isSignin">欢迎登录聊天平台</span><span v-if="!isSignin">欢迎注册聊天平台</span>
 			</h2>
 		    <div class="logininput">
-		    	 <input type="text"  @keydown="notallownull($event)"    @keyup="debounce($event)" maxlength="13"  placeholder="请输入用户名" v-model="username"/>
+		    	 <input type="text"   @keydown="notallownull($event)"    @keyup="debounce($event)" maxlength="11"  placeholder="请输入用户名" v-model="username"/>
 		    </div>
 		    <div class="usererro">
-		       <span  v-if="isSignin && isnothaveuser">用户名未注册</span><span v-if="ishaveuser">该用户名已存在,请重新输入</span><span v-if="isnulluser">用户名长度不可小于2位</span>
+		       <span  v-if="isSignin && isnothaveuser">用户名未注册</span><span v-if="ishaveuser">该用户名已存在,请重新输入</span><span v-if="isnulluser">用户名不可为空且不可小于2位</span>
 		    </div>
 		    <div class="logininput marginbottom0">
 		    	   <input type="password"  @keydown="notallownull($event)"  @keyup="testpassword($event)" @focus="getfocus"   maxlength="13"  placeholder="请输入6至13位密码" v-model="password"/>
@@ -85,9 +85,7 @@ import {http} from 'common/js/http'
 	      		axios.post("chat/getUserInfo").then(res=>{
 	      			
 	      		    console.log(res);
-	      		    if(res.data.code==3){
-	      		  
-	      		    }else if(res.data.code==1){
+	      		    if(res.data.code==1){
 	      		    	 this.$router.replace({
 								path:'/manage'
 							})		
@@ -110,7 +108,7 @@ import {http} from 'common/js/http'
 				
 				if(this.username==="" || this.username.length<2){
 					this.isnulluser=true;
-					return
+					return     
 				}
 				if(this.password===""){
 					this.isnullpassword=true;
@@ -212,11 +210,12 @@ import {http} from 'common/js/http'
 				})
 			},
 			debounce(ev){   //请求节流
-				if(this.username!=""){
+				if(this.username!=""){          
 			 	   this.isnulluser=false;
 			    }
 				if(this.username===""){
-					this.isnothaveuser=false;
+					this.isnulluser=false;
+			     //	this.isnothaveuser=false;
 				}
 				if(ev.keyCode==13){
 					if(this.isSignin){

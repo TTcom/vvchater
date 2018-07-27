@@ -41,7 +41,7 @@ const webpackConfig = merge(baseWebpackConfig, {
 //        pure_funcs: ['console.log']//移
         }
       },
-      sourceMap: config.build.productionSourceMap,
+    //  sourceMap: config.build.productionSourceMap,
       parallel: true
     }),
     // extract css into its own file
