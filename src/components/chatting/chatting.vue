@@ -1,7 +1,8 @@
 <template>
 	<div>
-		<success :successtext="successmsg" v-if="successsignout"></success>
+	   <success :successtext="successmsg" v-if="successsignout"></success>
 	   <progressbar v-if="isprogressbar" :speed="speed" :sendtext="sendtext"></progressbar>
+	   <error :errortext="errortext" v-if="iserror"></error>
 	<div class="containerss">
 		  <div  class="box">
 		  	 
@@ -118,10 +119,12 @@
 	import {http} from 'common/js/http'
 	import Progressbar from 'base/progress/progress'
 	import Success from 'base/success/success'
+	import Error from 'base/error/error'
 	export default{
       components:{
       	Progressbar,
-      	Success
+      	Success,
+      	Error
       },
       data(){
       	return{
@@ -153,6 +156,8 @@
       	    searchuserlist:[],
       	    entersearch:false,
       	    broadcastnumber:0,
+      	    iserror:false,
+      	    errortext:"错误"
 
       	}
       },
@@ -174,7 +179,7 @@
       },
       created(){
      	 sessionStorage.clear()
-      	 this.getUserMessage();
+         this.getUserMessage();
       	 setInterval(this.keepalive,29*60*1000)
       },  
       methods:{
@@ -233,6 +238,11 @@
 						  console.log(arr);
 				   	  }
 				  }
+				   
+				   if(this.searchuserlist.length>0 && this.searchuser==""){
+				   	  		this.cannelsearch()
+				   	 }
+				   
       	},
       	friendtalk(i,item){    //好友列表聊天
       		
@@ -306,11 +316,11 @@
       		    	this.$router.replace('/');
       		    	
       		    }else{
-	        	   this.username = res.data.data.user.username;
-	        	   if(res.data.data.user.picpath){
-	        	   	this.userpicpath = res.data.data.user.picpath;
+	        	   this.username = res.data.data.username;
+	        	   if(res.data.data.picpath){
+	        	   	this.userpicpath = res.data.data.picpath;
 	        	   }
-	      		   this.userid=res.data.data.user.id;
+	      		   this.userid=res.data.data.id;
 	      		   this.serverip=res.data.message;
 	      		   console.log("serverip"+this.serverip);      
 	      		   this.initWebSocket();
@@ -523,8 +533,21 @@
        		   	
        		   if(this.filepath=="" && this.picpath==""){
 		        	if(this.sendmessage==""){
+		        		
 		        		return;
 		        	}else{
+		        		
+		        	
+
+					var a = this.sendmessage;
+					var str=a.replace(new RegExp("<","g"),"&lt;").replace(new RegExp(">","g"),"&gt;")
+                     
+                      console.log("str"+str);
+                      
+                      this.sendmessage=str;
+                     
+                     console.log(this.sendmessage);
+		        		
 		        		var reg = new RegExp("\n", "g");
 						this.sendmessage = this.sendmessage.replace(reg, "<br/>");
 		        	}
@@ -629,22 +652,59 @@
         	
         },
       	uploadpice(i){          //图片上传
-      		if(i==1){
+      		
+      		var formData = new FormData(); 
+      		
+      		if(i==1){      //
+      			
       			var inputDOM = this.$refs.picers;
+      			var File=inputDOM.files[0];
+      			inputDOM.value="";
+      			
+      			if(File.size>5242880){
+      				this.iserror=true;
+      				this.errortext="图片不可大于5MB";
+      				setTimeout(()=>{
+        			  this.iserror=false;
+        		   },1600)
+      				return;
+      			}
+
+      			if(File.type=="image/jpeg" || File.type=="image/png"){
+      				
+      			    formData.append("id", this.userid);
+      			    
+      			}else{
+      				this.iserror=true;
+      				this.errortext="仅支持jpg和png格式";
+      				setTimeout(()=>{
+        			  this.iserror=false;
+        		   },1600)
+      				
+      				return;  
+      			}
+      			
+      			
       		}else{
       			var inputDOM = this.$refs.picersss;
+      			var File=inputDOM.files[0];
+      			inputDOM.value="";	 
+      			if(File.size>5242880){
+      				this.iserror=true;
+      				this.errortext="文件不可大于1G";
+      				setTimeout(()=>{
+        			  this.iserror=false;
+        		   },500)
+      				
+      				return;
+      			}
       		}
-			let hhh=inputDOM.files[0];
 			
-			let imagSize = hhh.size; //图片尺寸大小单位为（b字节）
 
-			 inputDOM.value="";	 
-				 var formData = new FormData(); 
-		         
-		          formData.append("file", hhh);
-		          if(i==1){
-		          	formData.append("id", this.userid);
-		          }
+			      
+                  formData.append("file", File);
+		          
+		  
 				let httper="file/upload";      
 				var _this=this;
 				 axios({
@@ -722,7 +782,7 @@
  	.containerss {
 		    margin: 0 auto;
 		    overflow: auto;
-		    padding-right: 17px;
+		    /*padding-right: 16px;*/
 		    width: 100%;
 		    height: 100vh;	
  	}
@@ -771,7 +831,6 @@
 			    top: 10px;
 			    height: 21px;
 			    width: 21px;
-			    cursor: pointer;
  			}
  			.clearsearch{
  				position: absolute;
@@ -874,7 +933,7 @@
 		    display: inline-block;
 		    border-radius: 5px;
 		    top: 0px;
-		    right: -69px;
+		    right: -100px;
 		    padding: 4px 9px;
  		}	
  	}

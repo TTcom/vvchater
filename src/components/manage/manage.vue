@@ -159,7 +159,7 @@ import Loading from 'base/loading/loading'
 			     }else{
 			     	 params.append('currentPage', current);
 			     }
-			        params.append('pageSize', 4);
+			        params.append('pageSize', this.shownum);
 	
 				axios({
 				  method: 'post',

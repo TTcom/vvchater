@@ -4,6 +4,9 @@
         <success :successtext="successmsg" v-if="successsignon"></success>
         <success :successtext="signinsuccessmsg" v-if="successssiginin"></success>
         <error :errortext="errortext" v-if="iserror"></error>
+        <div class="mainsigin">
+
+       <div class="loginmain">
 		<div class="login" :class="{height450:!isSignin}">
 			<h2>
 				<span v-if="isSignin">欢迎登录聊天平台</span><span v-if="!isSignin">欢迎注册聊天平台</span>
@@ -35,6 +38,8 @@
 		    <div class="nouser">
 		    	   <span v-if="isSignin">没有账号？</span><span v-if="!isSignin">已有账号？</span><span class="cblack" @click="signup"><span v-if="isSignin">注册</span><span v-if="!isSignin">登录</span></span>
 		    </div>
+	  </div>
+	  </div>
 	 </div>
 	</div>
 	
@@ -325,20 +330,34 @@ import {http} from 'common/js/http'
 		      width:100% ！importanrt;    
 		      height:100% !important;
 		}	
+	.mainsigin{
+		   display: flex;
+		    flex-direction: column;
+		    justify-content: center;
+		    align-items: center;
+		    width: 100%;
+		    height: 100vh;
+		    overflow: auto;
+		    overflow-x: hidden;
+	  .loginmain{
+	  	     width: 100%;
+		    overflow-x: hidden;
+		    overflow-y: auto;
+		    padding-right: 33px;
+            padding-left: 33px;
 	  .login{
-	  	z-index:2;
 	  	width: 390px;
-	  	height: 350px;
-	  	background-color:white;
-	  	border-radius: 5px;
-       	position: fixed;
-       	top:0;
-       	left: 0;
-       	bottom: 0;
-       	right: 0;
-       	margin: auto; 
-       	transition: height .5s;	
-       	overflow: hidden;
+	    margin: auto;
+	    overflow-y: scroll;
+	  	z-index: 2;
+	    width: 390px;
+	    height: 350px;
+	    background-color: white;
+	    border-radius: 5px;
+	    -webkit-transition: height .5s;
+	    -o-transition: height .5s;
+	    transition: height .5s;
+	    overflow:hidden;
        	h2{
        		color: black;
        		font-size: 30px;
@@ -430,9 +449,11 @@ import {http} from 'common/js/http'
        		}
        		
        	}
-	  }
+	   }
+	  } 
+	 } 
 	  .height450{
-	  	height: 440px;
+	  	height: 440px !important;
 	  }
 	  .music{
 	  	position: fixed;

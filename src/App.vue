@@ -12,24 +12,24 @@
 	export default{
 		 
 		created(){
-//			     this.$router.replace({
-//								     path:'/manage'
-//							     })		
-			axios.post("chat/getUserInfo").then(res=>{
-				        console.log(res);
-	      		    if(res.data.code==3){
-	      		    	this.$router.replace('/');
-	      		    }else if(res.data.code==1){
-	      		    	 this.$router.replace({
-								      path:'/manage'
-							    })		
-	      		    }else if(res.data.code==0){
-	      		    	 this.$router.replace({
+			     this.$router.replace({
 								     path:'/chatting'
 							     })		
-	      		    	 
-	      		    }
-	      		})
+//			axios.post("chat/getUserInfo").then(res=>{
+//				        console.log(res);
+//	      		    if(res.data.code==3){
+//	      		    	this.$router.replace('/');
+//	      		    }else if(res.data.code==1){
+//	      		    	 this.$router.replace({
+//								      path:'/manage'
+//							    })		
+//	      		    }else if(res.data.code==0){
+//	      		    	 this.$router.replace({
+//								     path:'/chatting'
+//							     })		
+//	      		    	 
+//	      		    }
+//	      		})
 			  
 		}
 	}
@@ -42,7 +42,7 @@
 	  left: 0;
 	  width:100%;
 	  height:100%;
-	  min-width: 1000px;
+	 /* min-width: 1000px;*/
 	  z-index:-10;
 	  zoom: 1;
 	  background-color: #fff;
