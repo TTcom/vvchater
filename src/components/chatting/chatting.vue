@@ -74,7 +74,7 @@
 		  	   </div>
 		  	    
 		  	 <div class="talkfriendlist">
-		  	  	<div class="kefuone" :class="{cbgray:inlineindex==999}" @click="talkinbroad">
+		  	  	<div class="kefuone" :class="{cbgray:inlineindex=='rb'}" @click="talkinbroad">
 		  	  		<span class="fontweight positionrelative" >
 		  	  			广播
 		  	  		<span class="cred" v-show="isnewborad">{{broadcastnumber}}</span>
@@ -135,7 +135,7 @@
       		userpicpath:"static/boy.jpg",
       		userlist:[],
       		broadcast:[],
-      		inlineindex:999,
+      		inlineindex:"rb",
       		talktitle:"广播",
       		receiverId:"",
       		receiverName:"",
@@ -162,14 +162,14 @@
       	}
       },
       watch:{
-      	  userlist(){
+      	  userlist(){     //在线的人列表
         	        setTimeout(()=>{
       					var obj = document.getElementsByClassName('talkfriendlist')[0]
 		                      obj.scrollTop= obj.scrollHeight;   
 		  	  		},300);      			        	 	     
       	  	      
       	  },
-      	  promptlistarr(){
+      	  promptlistarr(){   //消息提示列表
          	        setTimeout(()=>{
       					var obj = document.getElementsByClassName('promptlist')[0]
 		                      obj.scrollTop= obj.scrollHeight;   
@@ -191,38 +191,36 @@
         	})
         	
         },
-      	testsend(ev){
+      	testsend(ev){   //消息编辑文本框键盘事件
 
-      		 if( ev.ctrlKey && ev.keyCode == 13 )   
-				{   
+      		 if( ev.ctrlKey && ev.keyCode == 13 ){   //如果是ctrl加enter就换行
 				     this.sendmessage=this.sendmessage+"\n";
-				     console.log(this.sendmessage)
                     return;
 				}
 			
-			if(ev.keyCode==13){
-				if (window.event) {
+			if(ev.keyCode==13){   //enter键向后台推送消息
+				if (window.event) {   
 					console.log(35235235)
-					window.event.returnValue = false;
+					window.event.returnValue = false;  //阻止textarea文本框键盘enter事件
 	                this.websocketsend();
 	            }else{
 	            	 console.log(35235235)
-	               	  ev.preventDefault(); //for firefox
+	               	  ev.preventDefault(); //for firefox下阻止textarea文本框键盘enter事件
 	               	  this.websocketsend();
 	             }
 			}
 
       	},
-      	cannelsearch(){
+      	cannelsearch(){    //取消用户搜索并清空搜索内容
       		this.entersearch=false;
       		this.searchuser="";
       		this.userlist=[];
       		this.userlist=this.searchuserlist.slice();
       		this.searchuserlist=[];
       	},
-      	testpassword(ev){
+      	testpassword(ev){        //用户搜索键盘抬起事件
 				
-				   if(ev.keyCode==13){
+				   if(ev.keyCode==13){   //如果是enter键
 				   	  if(this.searchuser!=""){
 				   	  	this.talkinbroad();
 				   	  	this.entersearch=true;
@@ -239,15 +237,15 @@
 				   	  }
 				  }
 				   
-				   if(this.searchuserlist.length>0 && this.searchuser==""){
+				   if(this.searchuserlist.length>0 && this.searchuser==""){   //如果搜索内容为空并且searchuserlist不为空
 				   	  		this.cannelsearch()
 				   	 }
 				   
       	},
-      	friendtalk(i,item){    //好友列表聊天
+      	friendtalk(i,item){    //在线列表用户点击事件
       		
       		var valuee=sessionStorage.getItem(item.username);
-        	 	if(valuee){
+        	 	if(valuee){   //如果存在用户的聊天记录
         	 		  valuee=JSON.parse(valuee);
         	 	     this.broadcast=valuee;
         	        setTimeout(()=>{
@@ -257,12 +255,11 @@
         	 	}else{
         	 		this.broadcast=[];
         	 	}
-      	  	this.inlineindex=i;
-      		this.receiverId=item.id;  //接受者的id
-      		this.receiverName=item.username;
-      		this.talktitle=item.username;
- 		  	this.userlist.forEach((value,i)=>{
- 		  	 	
+      	  	this.inlineindex=i;      //改变当前的用户选择背景
+      		this.receiverId=item.id;  //消息接受者的id
+      		this.receiverName=item.username;  //消息接受者的名字
+      		this.talktitle=item.username;     //改变聊天对象标题
+ 		  	this.userlist.forEach((value,i)=>{      //找到选择的用户对象并清空消息提示并将消息条数置为0
  		  	 	 if(value.username==item.username){
  		  	 	 	value.isnewmessage=false;
  		  	 	 	value.messagenumber=0;
@@ -270,12 +267,13 @@
  		  	})
       	},
       	talkinbroad(){   //广播聊天
-      		this.inlineindex=999;
-      		this.broadcastnumber=0;
-      		this.talktitle="广播";
-      		this.isnewborad=false;
-      		console.log(this.broadarr)
-      		if(this.broadarr.length>0){
+      		
+      		this.inlineindex="rb";   //改变聊天对象的背景色
+      		this.broadcastnumber=0;   //将聊天提醒条数置为0
+      		this.talktitle="广播";   //将聊天标题置为广播
+      		this.isnewborad=false;   //将提示隐藏
+      		
+      		if(this.broadarr.length>0){   //如果有广播聊天内容
       			let _arr =this.broadarr.slice()
       			this.broadcast=_arr;
         	        setTimeout(()=>{
@@ -294,20 +292,11 @@
       			if(res.data.code===0){
       				this.websock.close();
       				this.$router.replace('/');
-//    				this.successsignout=true;
-//    				if(this.timer){
-//		  	  		   clearTimeout(this.timer)
-//		  	  		}
-//    				this.timer=setTimeout(()=>{
-//    					    this.websock.close();
-//    					    this.successsignout=false;
-//       	                this.$router.replace('/');
-//		  	  		},1500);
       				
       			}
       		})
       	},
-      	getUserMessage(){              //获取用户信息
+      	getUserMessage(){   //获取用户信息并建立websocket连接
       		
       		axios.post("chat/getUserInfo").then(res=>{
       			
@@ -336,11 +325,11 @@
                 this.websock = new WebSocket("ws://"+serverip+":8081/chat/websocket/"+ider);
                 this.websock.onopen = this.websockonopen;  //建立连接
                 this.websock.onmessage=this.websockonmessage;    //数据接收
-                this.websock.onclose = function () {
+                this.websock.onclose = function () {    //关闭连接
 			        console.log("WebSocket连接关闭");
 			    }
 		        var _this=this;
-		      	window.onbeforeunload = () => { 
+		      	window.onbeforeunload = () => {     //页面刷新关闭连接
 		      	    _this.websock.close();
 		      	}
 
@@ -354,7 +343,7 @@
         	 console.log(message);
         	 if(message.messageType==0){    //接收广播
         	
-        	 if(this.talktitle!="广播"){
+        	 if(this.talktitle!="广播"){     //若果当前聊天对象不是广播
         	 	this.broadcastnumber+=1;
         	 	this.isnewborad=true;
         	 	this.broadarr.push(message);
@@ -369,12 +358,10 @@
 		                  obj.scrollTop= obj.scrollHeight;   
 		  	 },300);
 
-        	 	console.log("广播"+this.broadcast)
-        
         	 	
         	 }else if(message.messageType==2){    //接收新上线的人
         	 	
-        	 	if(this.entersearch){
+        	 	if(this.entersearch){      //如果当前是在搜索状态下
         	 		
         	 		  this.searchuserlist=JSON.parse(message.messageBody);
                       this.searchuserlist.forEach((value,i)=>{
@@ -389,11 +376,12 @@
                 	 })
         	 	}
 
-                if(this.userlist[this.userlist.length-1].username==this.username){
+                if(this.userlist[this.userlist.length-1].username==this.username){  
+                	//如果上线的用户是当前用户则返回-自己上线或下线不做提示
                 	return;
                 }
                 var username=this.userlist[this.userlist.length-1].username + "上线啦";
-                this.promptlistarr.push({
+                this.promptlistarr.push({       //消息提示列表插入消息提示
                 	"username":username,
                 	"date":message.date,
                 	"type":1
@@ -404,48 +392,50 @@
         	 	
         	 	
         	 	//获取
-        	  if(message.senderName==this.username){   //如果发送者是当前用户	
+        	  if(message.senderName==this.username){   
+        	  	//如果发送者是当前用户，则sessionStorage应当以接受者名称为键名存储
         	 	var valuee=sessionStorage.getItem(message.receiverName);
-        	 	if(valuee){
+        	 	if(valuee){   //如果已经存在该键名则插入新的消息并存入
         	 		  valuee=JSON.parse(valuee);
         	 		  valuee.push(message);
         	 		  valuee=JSON.stringify(valuee);
 		        	 		  sessionStorage.setItem(message.receiverName, valuee);
-		        	 		  if(this.talktitle!=message.receiverName){
-		        	 		  	
-		        	 		  	 this.userlist.forEach((value,i)=>{
-		        	 		  	 	
-		        	 		  	 	 if(value.username==message.receiverName){
-		        	 		  	 	 	
-		        	 		  	 	 	value.isnewmessage=true;
-		        	 		  	 	 	value.messagenumber+=1;
-		        	 		  	 	 	
-		        	 		  	 	 }
-		        	 		  	 	
-		        	 		  	 })
-		        	 		  	
-		        	 		  }else{
+//		        	 		  if(this.talktitle!=message.receiverName){
+//		        	 		  	//如果当前的聊天对象不是接受者
+//		        	 		  	
+//		        	 		  	 this.userlist.forEach((value,i)=>{
+//		        	 		  	 	
+//		        	 		  	 	 if(value.username==message.receiverName){
+//		        	 		  	 	 	
+//		        	 		  	 	 	value.isnewmessage=true;
+//		        	 		  	 	 	value.messagenumber+=1;
+//		        	 		  	 	 	
+//		        	 		  	 	 }
+//		        	 		  	 	
+//		        	 		  	 })
+//		        	 		  	
+//		        	 		  }else{
 		        	 		  	  this.broadcast.push(message);
 		        	 		  	
-		        	 		  }
+		        	 		//  }
         	 	}else{
         	 		//第一次存储
         	 		 let arr=[];
         	 		 arr.push(message);
                      arr=JSON.stringify(arr);
                      sessionStorage.setItem(message.receiverName, arr);
-                     if(this.talktitle!=message.receiverName){
-		        	 		  	 this.userlist.forEach((value,i)=>{	        	 		  	 	
-		        	 		  	 	 if(value.username==message.receiverName){
-		        	 		  	 	 	value.isnewmessage=true;
-		        	 		  	 	 	value.messagenumber+=1;
-		        	 		  	 	 }
-		        	 		  	 	
-		        	 		  	 })
-		        	 		  	
-		        	 		  }else{
+//                   if(this.talktitle!=message.receiverName){
+//		        	 		  	 this.userlist.forEach((value,i)=>{	        	 		  	 	
+//		        	 		  	 	 if(value.username==message.receiverName){
+//		        	 		  	 	 	value.isnewmessage=true;
+//		        	 		  	 	 	value.messagenumber+=1;
+//		        	 		  	 	 }
+//		        	 		  	 	
+//		        	 		  	 })
+//		        	 		  	
+//		        	 		  }else{
 		        	 		  	  this.broadcast.push(message);
-		        	 		  }
+		        	 	//	  }
         	 	}
         	 	  setTimeout(()=>{
       					var obj = document.getElementsByClassName('rightmiddle1')[0]
@@ -459,7 +449,8 @@
         	 		  valuee.push(message);
         	 		  valuee=JSON.stringify(valuee);
 		        	 		  sessionStorage.setItem(message.senderName, valuee);
-		        	 		  if(this.talktitle!=message.senderName){
+		        	 		  if(this.talktitle!=message.senderName){   
+		        	 		  	//如果聊天对象不是发送消息者则显示消息提示
 		        	 		  	
 		        	 		  	 this.userlist.forEach((value,i)=>{
 		        	 		  	 	
@@ -470,7 +461,7 @@
 		        	 		  	 	
 		        	 		  	 })
 		        	 		  	
-		        	 		  }else{
+		        	 		  }else{ 
 		        	 		  	  this.broadcast.push(message);
 		        	 		  	
 		        	 		  }
@@ -503,10 +494,11 @@
         	 	 console.log("下线的人"+message)
         	      var id= message.offlineUserId;
         	      if(this.receiverId==id){
-        	    
+        	       //如果下线的人是当前聊天对象，则跳转到广播聊天对象
         	      	  this.talkinbroad();
         	      	  
         	      }
+        	      //在线列表和sessionStorage删除改用户
         	      this.userlist.forEach((value,i)=>{
         	      	  if(value.id==id){
         	      	  	sessionStorage.removeItem(value.username);
@@ -514,6 +506,7 @@
         	      	  }
         	      });   
                if(message.offlineUserName==this.username){
+               	//如果离线的是当前用户则关闭websocket连接
       					this.websock.close();
          	            this.$router.replace('/');
                 	    return;
@@ -529,28 +522,29 @@
         },
         websocketsend(){   //发送消息
  
-       	    if(this.inlineindex==999){    //发送广播
+       	    if(this.inlineindex=="rb"){    //发送广播
        		   	
        		   if(this.filepath=="" && this.picpath==""){
+       		   	//如果是纯文本消息发送
 		        	if(this.sendmessage==""){
-		        		
+		        		//如果消息内容为空
 		        		return;
-		        	}else{
 		        		
-		        	
-
-					var a = this.sendmessage;
-					var str=a.replace(new RegExp("<","g"),"&lt;").replace(new RegExp(">","g"),"&gt;")
-                     
+		        	}else{
+		        	//转义html标签字符	
+					var str = this.sendmessage;
+					    str=str.replace(new RegExp("<","g"),"&lt;").replace(new RegExp(">","g"),"&gt;")
+					 
                       console.log("str"+str);
                       
                       this.sendmessage=str;
                      
                      console.log(this.sendmessage);
-		        		
+		        		//转义换行
 		        		var reg = new RegExp("\n", "g");
 						this.sendmessage = this.sendmessage.replace(reg, "<br/>");
 		        	}
+		        	//创建消息对象
 	       		   	  var data={
 	              	  "messageType":0,
 	              	  "senderId":this.userid,
@@ -558,6 +552,7 @@
 	              	  "messageBody":this.sendmessage
 	                  }
        		   }else{
+       		   	  //如果是文件消息发送
        		   	  if(this.filepath!=""){
        		   	  	 var data={
 	              	  "messageType":0,
@@ -567,7 +562,7 @@
 	              	  "messageBody":this.filepath,
 	              	  "filenames":this.filenames
 	                  }
-       		   	  }else if(this.picpath!=""){
+       		   	  }else if(this.picpath!=""){  //图片发送
        		   	  	 var data={
 	              	  "messageType":0,
 	              	  "fileType":1,
@@ -584,6 +579,16 @@
 			        	if(this.sendmessage==""){
 			        		return;
 			        	}else{
+		        	//转义html标签字符	
+							var str = this.sendmessage;
+							    str=str.replace(new RegExp("<","g"),"&lt;").replace(new RegExp(">","g"),"&gt;")
+							 
+		                      console.log("str"+str);
+		                      
+		                      this.sendmessage=str;
+		                     
+		                     console.log(this.sendmessage);
+		                     
 			        		var reg = new RegExp("\n", "g");
 							this.sendmessage = this.sendmessage.replace(reg, "<br/>");
 			        	}
@@ -621,6 +626,7 @@
        		   }
               
              }
+              //将消息对象转为字符串并清空消息内容并发送消息
               data=JSON.stringify(data);
               console.log(data);
         	  this.websock.send(data);
@@ -631,15 +637,13 @@
         	  console.log(this.sendmessage)
         },
         callback1(progressEvent){
-        	
+        	//滚动条显示
         	this.isprogressbar=true;
-        	console.log(progressEvent);
-        	console.log(progressEvent.loaded);
-        	console.log(progressEvent.total);
+            //获取当前上传进度百分比
         	var numlength=progressEvent.loaded / progressEvent.total * 100;
-        	console.log(numlength);
-        	
+            //将百分比保留小数点后两位小数
         	this.speed=parseFloat(numlength.toFixed(2)) ;
+        	//进度为百分之百时
         	if(this.speed==100){
         		this.sendtext="发送成功";
         		setTimeout(()=>{
@@ -655,13 +659,13 @@
       		
       		var formData = new FormData(); 
       		
-      		if(i==1){      //
+      		if(i==1){      //如果为头像图片上传
       			
       			var inputDOM = this.$refs.picers;
       			var File=inputDOM.files[0];
       			inputDOM.value="";
-      			
-      			if(File.size>5242880){
+      			//图片大小不可大于5MB
+      			if( File.size > (5*1024*1024) ){
       				this.iserror=true;
       				this.errortext="图片不可大于5MB";
       				setTimeout(()=>{
@@ -669,7 +673,7 @@
         		   },1600)
       				return;
       			}
-
+                  //限制头像图片上传格式
       			if(File.type=="image/jpeg" || File.type=="image/png"){
       				
       			    formData.append("id", this.userid);
@@ -685,11 +689,12 @@
       			}
       			
       			
-      		}else{
+      		}else{   //聊天消息上传
       			var inputDOM = this.$refs.picersss;
       			var File=inputDOM.files[0];
-      			inputDOM.value="";	 
-      			if(File.size>5242880){
+      			inputDOM.value="";
+      			//文件大小不可超过1G
+      			if( File.size > (1*1024*1024*1024) ){
       				this.iserror=true;
       				this.errortext="文件不可大于1G";
       				setTimeout(()=>{
@@ -698,13 +703,9 @@
       				
       				return;
       			}
-      		}
-			
-
-			      
-                  formData.append("file", File);
-		          
-		  
+      		}			      
+                //插入文件file对象
+                formData.append("file", File);
 				let httper="file/upload";      
 				var _this=this;
 				 axios({
@@ -720,23 +721,22 @@
 		            data:formData
 		        }).then(res =>{
 		           console.log(res);
-		           if(res.data.code==2){
+		           
+		           if(res.data.code==2){    //聊天文件上传成功
 		         
 		           	  _this.filepath=res.data.data.path;
 		           	  _this.filenames=res.data.message;
 		           	  _this.websocketsend();
 		           }
-		           if(res.data.code==1){
-		           	   if(i==1){
+		           if(res.data.code==1){  
+		           	   if(i==1){    //头像上传成功
 		           	   	   _this.userpicpath=res.data.data.path;
-		           	   }else{
+		           	   }else{    //聊天图片上传成功
 		           	   	 _this.picpath=res.data.data.path;
 		           	     _this.websocketsend();
 		           	   }
 		           }
-		        }).then(error =>{
-		            console.log(error)
-		        })			
+		        })		
       	}
       	
       }
@@ -763,9 +763,6 @@
  		align-items: center;
  		margin: auto;
  		padding: 0 20px;
- 		img{
- 			
- 		}
  		.usertouxiang{
  			cursor: pointer;
  			width: 30px;
@@ -782,7 +779,6 @@
  	.containerss {
 		    margin: 0 auto;
 		    overflow: auto;
-		    /*padding-right: 16px;*/
 		    width: 100%;
 		    height: 100vh;	
  	}
@@ -794,9 +790,9 @@
  		flex-direction: row;
  		justify-content: flex-start;
  		font-size: 15px;
- 		min-height: 688px;
  		width: 1100px;
-         margin: 0 auto;
+        margin: 0 auto;
+        min-height: 600px;
  	}	
  	
  	.gayslist {

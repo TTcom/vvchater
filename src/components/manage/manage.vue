@@ -29,7 +29,7 @@
          			<td>身高</td>
          			<td>操作</td>
          		</tr>
-         		<tr v-for="(item,i) in userarr" v-if="item.authority!=1">
+         		<tr v-for="(item,i) in userarr">
          			<td>{{item.username}}</td>
          			<td><span>******</span></td>
          			<td>—</td>
@@ -75,7 +75,7 @@ import Loading from 'base/loading/loading'
   	  		isdelet:false,
   	  		showItem:5,
   	  		allpage:0,
-  	  		shownum:4,
+  	  		shownum:6,
   	  		userarr:[],
   	  		password:"",
   	  		indexid:"",
@@ -93,29 +93,20 @@ import Loading from 'base/loading/loading'
   	  	}
   	  },
   	  methods:{
-  	  	mannersignout(){
+  	  	
+  	  	mannersignout(){     //管理员退出登录
   	  		axios.post("chat/signOut").then(res=>{
       			
       			if(res.data.code===0){
       				 this.$router.replace('/');
-//    				this.successtext="退出成功";
-//    				this.issuccess=true;
-//    				if(this.timer){
-//		  	  		   clearTimeout(this.timer)
-//		  	  		}
-//    				this.timer=setTimeout(()=>{
-//    					    this.issuccess=false;
-//       	               
-//		  	  		},1500);
       			}
       			
       		})
   	  	},
-  	  	getUserMessage(){              //获取用户信息
+  	  	getUserMessage(){     //获取用户信息
       		
       		axios.post("chat/getUserInfo").then(res=>{
-                
-                console.log(res);
+
                 if(res.data.code===1){
                 	this.getusermessage(1);
       		    	
@@ -126,39 +117,28 @@ import Loading from 'base/loading/loading'
       		})
       	},
   	 
-  	  	keysearch(ev){
+  	  	keysearch(ev){     //用户搜索按键事件
 	        if(ev.keyCode==13){
-	        
-		   	   this.searchuser(0);
+	           
+		   	   this.searchuser(1);
 		   	  }  	
-		   	 if(this.searchtext==""){
+		   	 if(this.searchtext==""){    //如果搜索内容为空用户列表则恢复为所有用户
 		   	 	this.lookall()
 		   	 }
   	  	},  	  	
-  	  	testpassword(ev){
-	        if(ev.keyCode==13){
-		   	   this.searchuser(0)
-		   	  }
-  	  	},
-  	  	searchuser(current){
-            if(!this.searchpaging){
-            	this.$refs.paginger.current=1;
-            }
+  	  	searchuser(current){    //用户模糊查询
+  	  		
   	  		this.searchpaging=true;
   	  		if(this.searchtext==""){
   	  			return;
   	  		}else{
-  	  		   this.loadingtext="搜索中"
+  	  			//显示加载状态
+  	  		   this.loadingtext="获取中"
   	  		   this.isloading=true;
   	  			
   	  	 		let params = new URLSearchParams();
-			      params.append('username', this.searchtext);
-
-			     if(current==0){
-			     	params.append('currentPage', 1);
-			     }else{
+			         params.append('username', this.searchtext);
 			     	 params.append('currentPage', current);
-			     }
 			        params.append('pageSize', this.shownum);
 	
 				axios({
@@ -169,16 +149,19 @@ import Loading from 'base/loading/loading'
 				    },
 				  data:params
 				}).then(res=>{
-					if(res.data.code==3){
+					
+					if(res.data.code==3){   //无管理员权限
 						this.$router.replace('/');
 						
 					}else{
 						this.isloading=false;
 						console.log(res);
-						  if(current==0){
+						  if(current==1){    //如果为第一页或第一次搜索
 						  	this.$refs.paginger.current=1;
 						  }
+						 //获取总页数
 						this.allpage=parseInt(res.data.message);
+						//获取当前页用户信息
 						this.userarr=res.data.data;
 					}
 				})
@@ -186,12 +169,14 @@ import Loading from 'base/loading/loading'
   	  		}
   	  		
   	  	},
-  	  	lookall(){
+  	  	lookall(){       //查看所有用户
+  	  		
   	  		this.searchpaging=false;
-  	  		this.getusermessage(1,2);
+  	  		//获取所有的用户并跳转到第一页
+  	  		this.getusermessage(1);
   	  		
   	  	},
-  	  	uploaduser(){
+  	  	uploaduser(){      //重置用户密码
   	  		
   	  		    this.loadingtext="重置中"
   	  		    this.isloading=true;
@@ -207,13 +192,22 @@ import Loading from 'base/loading/loading'
 				    },
 				  data:params
 				}).then(res=>{
-					console.log(res);
+					//清除存储的用户的信息
 					this.username="";
 					this.password="";
 					this.indexid="";
-					if(res.data.code===0){
-		  	  			this.updateusermessage(this.$refs.paginger.current);
-					}else if(res.data.code===1){
+					if(res.data.code===0){   //重置成功
+                        this.isloading=false;
+		  	  			if(this.timer){
+		  	  				 clearTimeout(this.timer)
+		  	  			}
+		  	  			this.successtext="重置成功"
+		  	  			this.issuccess=true;
+		  	  			this.timer=setTimeout(()=>{
+		  	  				this.issuccess=false;
+		  	  			},1500);
+		  	  			
+					}else if(res.data.code===1){   //不可重置在线用户
 						this.isloading=false;
 						if(this.timer){
 		  	  				 clearTimeout(this.timer)
@@ -224,46 +218,13 @@ import Loading from 'base/loading/loading'
 		  	  				this.iserror=false;
 		  	  			},1500)
 						
-					}else if(res.data.code==3){
+					}else if(res.data.code==3){   //没有管理员权限
 						this.$router.replace('/');
 						
 					 }
 
 				})	
   	  		
-  	  	},
-  	  	updateusermessage(current){   //更新用户信息
-  	  		
-  	  	 		let params = new URLSearchParams();
-			      params.append('pageSize', this.shownum);
-			      params.append('currentPage', current);
-				axios({
-				  method: 'post',
-				  url: 'user/findUsersByPage',
-				  headers:{
-				        'Content-type': 'application/x-www-form-urlencoded'
-				    },
-				  data:params
-				}).then(res=>{
-					
-					if(res.data.code==3){
-						this.$router.replace('/');
-						
-					 }else{
-					
-					this.allpage=parseInt(res.data.message);
-					this.userarr=res.data.data;
-                    this.isloading=false;
-		  	  			if(this.timer){
-		  	  				 clearTimeout(this.timer)
-		  	  			}
-		  	  			this.successtext="重置成功"
-		  	  			this.issuccess=true;
-		  	  			this.timer=setTimeout(()=>{
-		  	  				this.issuccess=false;
-		  	  			},1500);
-		  	  		}
-				})
   	  	},
   	  	updateuser(item){    //修改用户
   	  		this.username=item.username;
@@ -272,16 +233,19 @@ import Loading from 'base/loading/loading'
   	  		
   	  	},
   	  	pagingmessage(current){
+  	  		//判断是否为模糊搜索查询
   	  		if(this.searchpaging){
   	  			this.searchuser(current)
   	  		}else{
   	  			this.getusermessage(current)
   	  		}
   	  	},
-  	  	getusermessage(current,index){    //分页
+  	  	getusermessage(current){    //获取所有用户列表分页
 
   	  	 		let params = new URLSearchParams();
+  	  	 		  //插入每页显示的条数
 			      params.append('pageSize', this.shownum);
+			      //插入显示的页数
 			      params.append('currentPage', current);
 				axios({
 				  method: 'post',
@@ -291,26 +255,28 @@ import Loading from 'base/loading/loading'
 				    },
 				  data:params
 				}).then(res=>{
-					if(res.data.code==3){
+					
+					if(res.data.code==3){     //如果没有管理员权限
 						this.$router.replace('/');
 					
 					}else{
-						console.log(res.data.data)
+						console.log(res)
 						this.allpage=parseInt(res.data.message);
 						this.userarr=res.data.data;
-						if(index===2){
+						if(current==1){
 							this.$refs.paginger.current=1;
 						}
 					}
 				})	
   	  	},
-  	  	deletuser(item){
+  	  	deletuser(item){    //删除用户
   	  		
-  	  		    this.deleteid=item.id;
+  	  		    this.deleteid=item.id;  //存储想要删除的用户的id
+  	  		    //显示删除提示模态层
   	  		    this.$refs.frame.show();
   	  		
   	  	},
-  	  	sure(){
+  	  	sure(){   //确认删除按钮操作
   	  		console.log("确认删除");
   	  		this.$refs.frame.hide();
   	  		let params = new URLSearchParams();
@@ -325,7 +291,7 @@ import Loading from 'base/loading/loading'
 				}).then(res=>{
 					
 					console.log(res);
-					if(res.data.code===0){
+					if(res.data.code===0){        //删除成功
 		  	  			if(this.timer){
 		  	  				 clearTimeout(this.timer)
 		  	  			}
@@ -334,13 +300,15 @@ import Loading from 'base/loading/loading'
 		  	  			this.timer=setTimeout(()=>{
 		  	  				this.issuccess=false;
 		  	  			},1500);
-		  	  			if(this.searchpaging){
-  	  			           this.searchuser(0)
-			  	  		}else{
+		  	  			if(this.searchpaging){    //如果是在搜索的用户列表下删除用户则重新获取搜索的用户信息
+		  	  				
+  	  			           this.searchuser(1);
+  	  			           
+			  	  		}else{  //如果不是则获取所有的用户
 					  	  		this.lookall();
 			  	  		}
 		  	  			
-					}else if(res.data.code===3){
+					}else if(res.data.code===3){      //如果删除的是在线的用户
 						
 		  	  			if(this.timer){
 		  	  				 clearTimeout(this.timer)
@@ -350,7 +318,7 @@ import Loading from 'base/loading/loading'
 		  	  			this.timer=setTimeout(()=>{
 		  	  				this.iserror=false;
 		  	  			},1500)
-					}else if(res.data.code===1){
+					}else if(res.data.code===1){      //如果删除的用户不存在
 						
 		  	  			if(this.timer){
 		  	  				 clearTimeout(this.timer)
@@ -360,14 +328,14 @@ import Loading from 'base/loading/loading'
 		  	  			this.timer=setTimeout(()=>{
 		  	  				this.iserror=false;
 		  	  			},1500)
-					}else if(res.data.code===4){
+					}else if(res.data.code===4){    //如果没有删除用户的权限
 						this.$router.replace('/');
 					}
 
 				});
   	  		
   	  	},
-  	  	cannel(){
+  	  	cannel(){    //取消删除用户
   	  		console.log("取消删除");
   	  		this.$refs.frame.hide();
   	  	}

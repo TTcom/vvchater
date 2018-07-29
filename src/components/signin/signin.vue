@@ -85,11 +85,12 @@ import {http} from 'common/js/http'
 
 		},
 		methods:{
-			  getUserMessage(){              //获取用户信息
+			  getUserMessage(){  //获取用户信息
 	      		
 	      		axios.post("chat/getUserInfo").then(res=>{
 	      			
 	      		    console.log(res);
+	      		    //根据后台返回的状态码决定页面跳转地址
 	      		    if(res.data.code==1){
 	      		    	 this.$router.replace({
 								path:'/manage'
@@ -105,13 +106,15 @@ import {http} from 'common/js/http'
 		   notallownull(ev){   //限制输入空格
 		   	if(ev.keyCode == 32)ev.returnValue = false;
 		   },
-           getfocus(){
+           getfocus(){   //input密码输入框获取焦点时
            	this.isnullpassword=false;
            	this.issurelength=false;
+           	this.iserrorpassword=false;
            },
 			userlogin(){    //聊天用户登录
 				
-				if(this.username==="" || this.username.length<2){
+				//判断用户名和密码输入是否正确
+				if(this.username==="" || this.username.length<2){ 
 					this.isnulluser=true;
 					return     
 				}
@@ -135,7 +138,7 @@ import {http} from 'common/js/http'
 				  data:params
 				}).then(res=>{
 					console.log(res);
-                      if(res.data.code===0){
+                      if(res.data.code===0){   //用户验证正确
                       	
                       	this.successssiginin=true;
 						setTimeout(()=>{
@@ -149,9 +152,9 @@ import {http} from 'common/js/http'
 					   	  })
 						},2000)
                       	
-                     }else if(res.data.code===1){
+                     }else if(res.data.code===1){    //密码错误时
                       	this.iserrorpassword=true;
-                     }else if(res.data.code===2){
+                     }else if(res.data.code===2){     //管理员登录
                       	this.successssiginin=true;
 						setTimeout(()=>{
 							this.successssiginin=false;	
@@ -159,7 +162,7 @@ import {http} from 'common/js/http'
 								path:'/manage'
 							})		
 						},2000)
-                      }else if(res.data.code===4){
+                    }else if(res.data.code===4){  //用户已在别处登录
                       	
                       	     this.iserror=true;
 		      				if(this.timer){
@@ -173,12 +176,12 @@ import {http} from 'common/js/http'
 				      
 				})
 			},
-			testpassword(ev){
+			testpassword(ev){      //密码文本框键盘抬起事件
 				if(this.password!=""){
 				   this.isnullpassword=false
 				   this.iserrorpassword=false
-				   if(ev.keyCode==13){
-					   	if(this.isSignin){
+				   if(ev.keyCode==13){   //判断键盘是否为enter 
+					   	if(this.isSignin){   //判断是登陆还是注册
 						   	   this.userlogin();
 						}else{
 							  this.userRegister();
@@ -187,6 +190,7 @@ import {http} from 'common/js/http'
 				 } 
 			},
 			iscommon(){   //判断用户是否存在
+				
 			  let params = new URLSearchParams();
 			      params.append('username', this.username);
 				axios({
@@ -198,13 +202,13 @@ import {http} from 'common/js/http'
 				  data:params
 				}).then(res=>{
 					console.log(res);
-					if(!this.isSignin){
-						if(res.data.code===1){
+					if(!this.isSignin){   //如果是注册状态下    
+						if(res.data.code===1){   
 							this.ishaveuser=true;
 						}else{
 							this.ishaveuser=false;
 						}
-					}else{
+					}else{   //如果是登录状态下   
 						if(res.data.code===0 && this.username!==""){
 							this.isnothaveuser=true;
 						}else{
@@ -220,9 +224,8 @@ import {http} from 'common/js/http'
 			    }
 				if(this.username===""){
 					this.isnulluser=false;
-			     //	this.isnothaveuser=false;
 				}
-				if(ev.keyCode==13){
+				if(ev.keyCode==13){    //判断是否为enter键
 					if(this.isSignin){
 					   	   this.userlogin();
 					}
@@ -235,7 +238,7 @@ import {http} from 'common/js/http'
 			       },700)
 				
 			},
-			userRegister(){
+			userRegister(){     //用户注册
 				
 				if(this.username=="" || this.username.length<2){
 					this.isnulluser=true;
@@ -278,19 +281,15 @@ import {http} from 'common/js/http'
 				})
 				
 			},
-			sinonorin(){
+			sinonorin(){   //登录或这注册按钮事件        
 					if(this.isSignin){   //登陆
-
 							this.userlogin();
 
 					}else{       //注册
-						
 						   this.userRegister();
 					}
-
-				
 			},
-			clearall(){
+			clearall(){          //清除所有的提示和文本框内容
 				this.username="";
 				this.password="";
 				this.passwordagain="";
@@ -303,16 +302,7 @@ import {http} from 'common/js/http'
 				this.iserrorpassword=false;
 				this.isnotcommon=false;
 			},
-			contorlmusic(){
-			   if(this.isplay){
-			   	this.$refs.audier.pause();
-			   	this.isplay=!this.isplay
-			   }else{
-			   	this.$refs.audier.play();
-			   	this.isplay=!this.isplay
-			   }
-			},
-			signup(){
+			signup(){   //登录、注册切换
 					this.clearall();
 			        this.isSignin=!this.isSignin
 					
